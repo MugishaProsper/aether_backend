@@ -1,5 +1,5 @@
 // MongoDB initialization script for development
-db = db.getSiblingDB('ecommerce');
+db = db.getSiblingDB('aether_db');
 
 // Create collections with validation
 db.createCollection('users', {

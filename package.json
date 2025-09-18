@@ -13,7 +13,7 @@
     "worker": "node src/workers/index.js"
   },
   "type": "module",
-  "keywords": ["aether", "nodejs", "mongodb", "redis", "microservices", "ai"],
+  "keywords": ["aether", "nodejs", "mongodb", "redis", "microservices", "ai", "e-commerce"],
   "author": "",
   "license": "ISC",
   "dependencies": {

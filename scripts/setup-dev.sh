@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Development setup script
-echo "Setting up E-commerce Backend Development Environment..."
+echo "Setting up Aether Backend Development Environment..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
@@ -69,7 +69,7 @@ echo "Installing development tools..."
 npm install -g nodemon
 
 echo ""
-echo "✅ Development environment setup complete!"
+echo "✅ Aether Backend Development environment setup complete!"
 echo ""
 echo "Services running:"
 echo "  - MongoDB: http://localhost:27017"

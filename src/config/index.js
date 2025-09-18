@@ -4,7 +4,7 @@ dotenv.config();
 
 export const config = {
   env: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '5000', 10),
   
   // Database
   mongodb: {
@@ -48,7 +48,7 @@ export const config = {
   upload: {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    destination: process.env.UPLOAD_DESTINATION || './uploads',
+    destination: process.env.FILE_UPLOAD_DESTINATION || './uploads',
   },
   
   // AWS S3
@@ -94,7 +94,7 @@ export const config = {
   // Monitoring
   monitoring: {
     jaegerEndpoint: process.env.JAEGER_ENDPOINT,
-    serviceName: process.env.SERVICE_NAME || 'ecommerce-backend',
+    serviceName: process.env.SERVICE_NAME || 'aether_backend',
     logLevel: process.env.LOG_LEVEL || 'info',
   },
   
