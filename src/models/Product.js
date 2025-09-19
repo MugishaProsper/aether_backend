@@ -118,8 +118,8 @@ const productSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['draft', 'active', 'inactive', 'archived'],
-    default: 'draft',
+    enum: ['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'],
+    default: 'DRAFT',
     index: true,
   },
   featured: {
@@ -214,12 +214,12 @@ productSchema.pre('save', function(next) {
   }
   
   // Set published date when status changes to active
-  if (this.isModified('status') && this.status === 'active' && !this.publishedAt) {
+  if (this.isModified('status') && this.status === 'ACTIVE' && !this.publishedAt) {
     this.publishedAt = new Date();
   }
   
   // Set archived date when status changes to archived
-  if (this.isModified('status') && this.status === 'archived' && !this.archivedAt) {
+  if (this.isModified('status') && this.status === 'ARCHIVED' && !this.archivedAt) {
     this.archivedAt = new Date();
   }
   
@@ -294,13 +294,13 @@ productSchema.statics.findBySlug = function(merchantId, slug) {
 productSchema.statics.findBySku = function(sku) {
   return this.findOne({ 
     'variants.sku': sku,
-    status: 'active'
+    status: 'ACTIVE'
   });
 };
 
 productSchema.statics.searchProducts = function(query, filters = {}) {
   const searchQuery = {
-    status: 'active',
+    status: 'ACTIVE',
     ...filters,
   };
   
@@ -314,7 +314,7 @@ productSchema.statics.searchProducts = function(query, filters = {}) {
 
 productSchema.statics.findFeatured = function(limit = 10) {
   return this.find({ 
-    status: 'active', 
+    status: 'ACTIVE', 
     featured: true 
   })
     .sort({ 'analytics.sales': -1, createdAt: -1 })
@@ -322,7 +322,7 @@ productSchema.statics.findFeatured = function(limit = 10) {
 };
 
 productSchema.statics.findTopSelling = function(merchantId, limit = 10) {
-  const query = { status: 'active' };
+  const query = { status: 'ACTIVE' };
   if (merchantId) query.merchantId = merchantId;
   
   return this.find(query)

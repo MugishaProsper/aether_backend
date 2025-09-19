@@ -17,8 +17,8 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['visitor', 'buyer', 'seller', 'admin', 'superadmin'],
-    default: 'buyer',
+    enum: ['VISITOR', 'BUYER', 'SELLER', 'ADMIN', 'SUPER_ADMIN'],
+    default: 'BUYER',
     index: true,
   },
   profile: {
@@ -78,8 +78,8 @@ const userSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'suspended', 'deleted'],
-    default: 'active',
+    enum: ['ACTIVE', 'SUSPENDED', 'DELETED'],
+    default: 'ACTIVE',
   },
   lastLoginAt: Date,
   lastLoginIP: String,
@@ -179,8 +179,8 @@ userSchema.statics.findByEmail = function(email) {
 
 userSchema.statics.findActiveMerchants = function() {
   return this.find({ 
-    role: 'seller', 
-    status: 'active',
+    role: 'SELLER', 
+    status: 'ACTIVE',
     merchantId: { $exists: true }
   });
 };

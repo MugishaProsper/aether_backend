@@ -77,14 +77,14 @@ dailySalesSchema.index({ 'metrics.revenue.gross': -1 });
 dailySalesSchema.methods.addOrder = function(orderData) {
   this.metrics.orders.total += 1;
   
-  if (orderData.status === 'completed' || orderData.status === 'delivered') {
+  if (orderData.status === 'COMPLETED' || orderData.status === 'DELIVERED') {
     this.metrics.orders.completed += 1;
     this.metrics.revenue.gross += orderData.total;
     this.metrics.revenue.net += orderData.total;
     this.metrics.revenue.tax += orderData.tax;
     this.metrics.revenue.shipping += orderData.shipping;
     this.metrics.products.sold += orderData.itemCount;
-  } else if (orderData.status === 'cancelled') {
+  } else if (orderData.status === 'CANCELLED') {
     this.metrics.orders.cancelled += 1;
   }
   
@@ -98,7 +98,7 @@ dailySalesSchema.methods.addOrder = function(orderData) {
   }
   
   hourlyRecord.orders += 1;
-  if (orderData.status === 'completed' || orderData.status === 'delivered') {
+  if (orderData.status === 'COMPLETED' || orderData.status === 'DELIVERED') {
     hourlyRecord.revenue += orderData.total;
   }
   

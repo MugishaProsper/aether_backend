@@ -120,24 +120,24 @@ const orderSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: [
-      'created',
-      'payment_pending',
-      'payment_failed',
-      'paid',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled',
-      'refunded',
-      'partially_refunded'
+      'CREATED',
+      'PAYMENT_PENDING',
+      'PAYMENT_FAILED',
+      'PAID',
+      'PROCESSING',
+      'SHIPPED',
+      'DELIVERED',
+      'CANCELLED',
+      'REFUNDED',
+      'PARTIALLY_REFUNDED'
     ],
-    default: 'created',
+    default: 'CREATED',
     index: true,
   },
   payment: {
     provider: {
       type: String,
-      enum: ['stripe', 'paypal', 'bank_transfer', 'cash_on_delivery'],
+      enum: ['STRIPE', 'PAYPAL', 'BANK_TRANSFER', 'CASH_ON_DELIVERY'],
       required: true,
     },
     paymentIntentId: {
@@ -147,8 +147,8 @@ const orderSchema = new mongoose.Schema({
     paymentMethodId: String,
     status: {
       type: String,
-      enum: ['pending', 'processing', 'succeeded', 'failed', 'cancelled'],
-      default: 'pending',
+      enum: ['PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELLED'],
+      default: 'PENDING',
     },
     amount: Number,
     currency: String,
@@ -165,8 +165,8 @@ const orderSchema = new mongoose.Schema({
   shipping: {
     method: {
       type: String,
-      enum: ['standard', 'express', 'overnight', 'pickup'],
-      default: 'standard',
+      enum: ['STANDARD', 'EXPRESS', 'OVERNIGHT', 'PICKUP'],
+      default: 'STANDARD',
     },
     cost: Number,
     carrier: String,
@@ -182,8 +182,8 @@ const orderSchema = new mongoose.Schema({
   fulfillment: {
     status: {
       type: String,
-      enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-      default: 'pending',
+      enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
+      default: 'PENDING',
     },
     processedAt: Date,
     shippedAt: Date,
@@ -217,8 +217,8 @@ const orderSchema = new mongoose.Schema({
   metadata: {
     source: {
       type: String,
-      enum: ['web', 'mobile', 'api', 'admin'],
-      default: 'web',
+      enum: ['WEB', 'MOBILE', 'API', 'ADMIN'],
+      default: 'WEB',
     },
     campaign: String,
     referrer: String,
@@ -258,28 +258,28 @@ orderSchema.pre('save', function(next) {
   const now = new Date();
   if (this.isModified('status')) {
     switch (this.status) {
-      case 'processing':
+      case 'PROCESSING':
         if (!this.fulfillment.processedAt) {
           this.fulfillment.processedAt = now;
-          this.fulfillment.status = 'processing';
+          this.fulfillment.status = 'PROCESSING';
         }
         break;
-      case 'shipped':
+      case 'SHIPPED':
         if (!this.fulfillment.shippedAt) {
           this.fulfillment.shippedAt = now;
-          this.fulfillment.status = 'shipped';
+          this.fulfillment.status = 'SHIPPED';
           this.shipping.shippedAt = now;
         }
         break;
-      case 'delivered':
+      case 'DELIVERED':
         if (!this.fulfillment.deliveredAt) {
           this.fulfillment.deliveredAt = now;
-          this.fulfillment.status = 'delivered';
+          this.fulfillment.status = 'DELIVERED';
           this.shipping.deliveredAt = now;
         }
         break;
-      case 'cancelled':
-        this.fulfillment.status = 'cancelled';
+      case 'CANCELLED':
+        this.fulfillment.status = 'CANCELLED';
         break;
     }
   }
@@ -289,11 +289,11 @@ orderSchema.pre('save', function(next) {
 
 // Instance methods
 orderSchema.methods.canBeCancelled = function() {
-  return ['created', 'payment_pending', 'paid'].includes(this.status);
+  return ['CREATED', 'PAYMENT_PENDING', 'PAID'].includes(this.status);
 };
 
 orderSchema.methods.canBeRefunded = function() {
-  return ['paid', 'processing', 'shipped', 'delivered'].includes(this.status);
+  return ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED'].includes(this.status);
 };
 
 orderSchema.methods.cancel = function(reason, cancelledBy) {
@@ -301,9 +301,9 @@ orderSchema.methods.cancel = function(reason, cancelledBy) {
     throw new Error('Order cannot be cancelled in current status');
   }
   
-  this.status = 'cancelled';
+  this.status = 'CANCELLED';
   this.timeline.push({
-    status: 'cancelled',
+    status: 'CANCELLED',
     timestamp: new Date(),
     notes: reason || 'Order cancelled',
     updatedBy: cancelledBy,
@@ -313,8 +313,8 @@ orderSchema.methods.cancel = function(reason, cancelledBy) {
 };
 
 orderSchema.methods.markAsPaid = function(paymentData) {
-  this.status = 'paid';
-  this.payment.status = 'succeeded';
+  this.status = 'PAID';
+  this.payment.status = 'SUCCEEDED';
   this.payment.paidAt = new Date();
   
   if (paymentData) {
@@ -334,13 +334,13 @@ orderSchema.methods.addRefund = function(refundData) {
   });
   
   const totalRefunded = this.payment.refunds.reduce((sum, refund) => {
-    return sum + (refund.status === 'succeeded' ? refund.amount : 0);
+    return sum + (refund.status === 'SUCCEEDED' ? refund.amount : 0);
   }, 0);
   
   if (totalRefunded >= this.pricing.total) {
-    this.status = 'refunded';
+    this.status = 'REFUNDED';
   } else if (totalRefunded > 0) {
-    this.status = 'partially_refunded';
+    this.status = 'PARTIALLY_REFUNDED';
   }
   
   return this.save();
@@ -349,8 +349,8 @@ orderSchema.methods.addRefund = function(refundData) {
 orderSchema.methods.updateShipping = function(shippingData) {
   Object.assign(this.shipping, shippingData);
   
-  if (shippingData.trackingNumber && this.status === 'processing') {
-    this.status = 'shipped';
+  if (shippingData.trackingNumber && this.status === 'PROCESSING') {
+    this.status = 'SHIPPED';
   }
   
   return this.save();
@@ -362,7 +362,7 @@ orderSchema.methods.getTotalQuantity = function() {
 
 orderSchema.methods.getRefundableAmount = function() {
   const totalRefunded = this.payment.refunds.reduce((sum, refund) => {
-    return sum + (refund.status === 'succeeded' ? refund.amount : 0);
+    return sum + (refund.status === 'SUCCEEDED' ? refund.amount : 0);
   }, 0);
   
   return Math.max(0, this.pricing.total - totalRefunded);
@@ -395,7 +395,7 @@ orderSchema.statics.findByIdempotencyKey = function(idempotencyKey) {
 
 orderSchema.statics.getOrderStats = function(merchantId, startDate, endDate) {
   const matchStage = {
-    status: { $in: ['paid', 'processing', 'shipped', 'delivered'] },
+    status: { $in: ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED'] },
   };
   
   if (merchantId) {
@@ -427,7 +427,7 @@ orderSchema.statics.getDailySales = function(merchantId, days = 30) {
   startDate.setDate(startDate.getDate() - days);
   
   const matchStage = {
-    status: { $in: ['paid', 'processing', 'shipped', 'delivered'] },
+    status: { $in: ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED'] },
     createdAt: { $gte: startDate },
   };
   

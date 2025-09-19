@@ -122,15 +122,15 @@ const cartSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'abandoned', 'converted', 'expired'],
-    default: 'active',
+    enum: ['ACTIVE', 'ABANDONED', 'CONVERTED', 'EXPIRED'],
+    default: 'ACTIVE',
     index: true,
   },
   metadata: {
     source: {
       type: String,
-      enum: ['web', 'mobile', 'api'],
-      default: 'web',
+      enum: ['WEB', 'MOBILE', 'API'],
+      default: 'WEB',
     },
     userAgent: String,
     ipAddress: String,
@@ -368,11 +368,11 @@ cartSchema.methods.mergeCarts = function(guestCart) {
 
 // Static methods
 cartSchema.statics.findByUser = function(userId, merchantId) {
-  return this.findOne({ userId, merchantId, status: 'active' });
+  return this.findOne({ userId, merchantId, status: 'ACTIVE' });
 };
 
 cartSchema.statics.findBySession = function(sessionId, merchantId) {
-  return this.findOne({ sessionId, merchantId, status: 'active' });
+  return this.findOne({ sessionId, merchantId, status: 'ACTIVE' });
 };
 
 cartSchema.statics.findOrCreateForUser = async function(userId, merchantId) {
@@ -382,7 +382,7 @@ cartSchema.statics.findOrCreateForUser = async function(userId, merchantId) {
     cart = new this({
       userId,
       merchantId,
-      status: 'active',
+      status: 'ACTIVE',
     });
     await cart.save();
   }
@@ -397,7 +397,7 @@ cartSchema.statics.findOrCreateForSession = async function(sessionId, merchantId
     cart = new this({
       sessionId,
       merchantId,
-      status: 'active',
+      status: 'ACTIVE',
     });
     await cart.save();
   }
@@ -409,7 +409,7 @@ cartSchema.statics.getAbandonedCarts = function(hoursAgo = 24) {
   const cutoffDate = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
   
   return this.find({
-    status: 'active',
+    status: 'ACTIVE',
     updatedAt: { $lt: cutoffDate },
     items: { $ne: [] },
   });

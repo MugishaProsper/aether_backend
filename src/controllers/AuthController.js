@@ -17,7 +17,7 @@ const logger = setupLogging();
 
 class AuthController {
   async register(req, res) {
-    const { email, password, name, phone, role } = req.body;
+    const { email, password, fullname, phone, role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -29,7 +29,7 @@ class AuthController {
     const user = new User({
       email,
       passwordHash: password, // Will be hashed by pre-save hook
-      profile: { name, phone },
+      profile: { fullname, phone },
       role: role || 'buyer',
       verification: {
         email: {
@@ -50,7 +50,7 @@ class AuthController {
     // Send verification email
     await EmailService.sendVerificationEmail(
       email, 
-      name, 
+      fullname, 
       `${process.env.FRONTEND_URL}/verify-email?token=${user.verification.email.token}`
     );
 
