@@ -22,8 +22,8 @@ class AdminController {
 
   static async analytics(req, res) {
     const { merchantId, startDate, endDate } = req.query;
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
+    // const start = startDate ? new Date(startDate) : undefined;
+    // const end = endDate ? new Date(endDate) : undefined;
     const summary = await DailySales.getSummary(merchantId, 30);
     return successResponse(res, { summary });
   }

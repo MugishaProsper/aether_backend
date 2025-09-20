@@ -16,8 +16,8 @@ class ProductController {
       if (maxPrice !== undefined) filters['variants.price'].$lte = Number(maxPrice);
     }
 
-    const query = q ? Product.searchProducts(q, filters) : Product.find({ status: 'active', ...filters });
-    const total = await Product.countDocuments({ status: 'active', ...filters });
+    const query = q ? Product.searchProducts(q, filters) : Product.find({ status: 'ACTIVE', ...filters });
+    const total = await Product.countDocuments({ status: 'ACTIVE', ...filters });
     const data = await query
       .sort(sort)
       .skip((Number(page) - 1) * Number(limit))
@@ -33,7 +33,7 @@ class ProductController {
   }
 
   static async getCategories(req, res) {
-    const categories = await Product.distinct('categories', { status: 'active' });
+    const categories = await Product.distinct('categories', { status: 'ACTIVE' });
     return successResponse(res, categories);
   }
 
@@ -41,7 +41,7 @@ class ProductController {
     const { q, page = 1, limit = 20, sort = '-createdAt', merchantId } = req.query;
     const filters = merchantId ? { merchantId } : {};
     const query = Product.searchProducts(q, filters);
-    const total = await Product.countDocuments({ status: 'active', ...filters });
+    const total = await Product.countDocuments({ status: 'ACTIVE', ...filters });
     const data = await query.sort(sort).skip((Number(page) - 1) * Number(limit)).limit(Number(limit));
     return successResponse(res, data, 'Products', 200);
   }
@@ -70,7 +70,7 @@ class ProductController {
     const related = await Product.find({
       _id: { $ne: product._id },
       categories: { $in: product.categories },
-      status: 'active',
+      status: 'ACTIVE',
     }).limit(Number(limit));
     return successResponse(res, related);
   }

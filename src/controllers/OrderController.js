@@ -41,15 +41,15 @@ class OrderController {
       pricing,
       currency: cart.currency,
       couponCode: cart.couponCode,
-      status: 'payment_pending',
+      status: 'PAYMENT_PENDING',
       payment: {
         provider: paymentMethod,
-        status: 'pending',
+        status: 'PENDING',
         amount: pricing.total,
         currency: cart.currency,
       },
       shipping: {
-        method: 'standard',
+        method: 'STANDARD',
         cost: pricing.shipping,
         address: shippingAddress,
       },
@@ -66,7 +66,7 @@ class OrderController {
     });
 
     // Mark cart as converted
-    cart.status = 'converted';
+    cart.status = 'CONVERTED';
     await cart.save();
 
     return successResponse(res, order, 'Order created', 201);

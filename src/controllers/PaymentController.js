@@ -27,16 +27,16 @@ class PaymentController {
 
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(order.pricing.total),
-      currency: (order.currency || 'rwf').toLowerCase(),
+      currency: (order.currency || 'RWF').toLowerCase(),
       metadata: { orderId: order._id.toString(), userId: userId?.toString() },
       payment_method: paymentMethodId || undefined,
-      confirmation_method: 'automatic',
-      capture_method: 'automatic',
+      confirmation_method: 'AUTOMATIC',
+      capture_method: 'AUTOMATIC',
       description: `Order ${order.orderNumber}`,
     });
 
     order.payment.paymentIntentId = intent.id;
-    order.payment.status = 'processing';
+    order.payment.status = 'PROCESSING';
     await order.save();
 
     return successResponse(res, { clientSecret: intent.client_secret, paymentIntentId: intent.id }, 'Payment intent created', 201);
@@ -56,7 +56,7 @@ class PaymentController {
     if (!order || order.userId.toString() !== userId.toString()) throw new NotFoundError('Order');
 
     const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    if (intent.status === 'succeeded') {
+    if (intent.status === 'SUCCEEDED') {
       await order.markAsPaid({ amount: intent.amount, currency: intent.currency });
     }
 

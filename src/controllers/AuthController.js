@@ -30,7 +30,7 @@ class AuthController {
       email,
       passwordHash: password, // Will be hashed by pre-save hook
       profile: { fullname, phone },
-      role: role || 'buyer',
+      role: role || 'BUYER',
       verification: {
         email: {
           verified: false,
@@ -41,7 +41,7 @@ class AuthController {
     });
 
     // Generate merchant ID for sellers
-    if (role === 'seller') {
+    if (role === 'SELLER') {
       user.merchantId = `merchant_${uuidv4().replace(/-/g, '').substring(0, 16)}`;
     }
 

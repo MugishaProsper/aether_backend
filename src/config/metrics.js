@@ -28,13 +28,13 @@ export const setupMetrics = () => {
   // Add default metrics
   client.collectDefaultMetrics({
     register,
-    prefix: 'ecommerce_',
+    prefix: 'aether_',
     gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
   });
 
   // HTTP Metrics
   httpRequestDuration = new client.Histogram({
-    name: 'ecommerce_http_request_duration_seconds',
+    name: 'aether_http_request_duration_seconds',
     help: 'Duration of HTTP requests in seconds',
     labelNames: ['method', 'route', 'status_code'],
     buckets: [0.01, 0.05, 0.1, 0.2, 0.5, 1, 2, 5],
@@ -42,14 +42,14 @@ export const setupMetrics = () => {
   });
 
   httpRequestTotal = new client.Counter({
-    name: 'ecommerce_http_requests_total',
+    name: 'aether_http_requests_total',
     help: 'Total number of HTTP requests',
     labelNames: ['method', 'route', 'status_code'],
     registers: [register],
   });
 
   httpRequestSize = new client.Histogram({
-    name: 'ecommerce_http_request_size_bytes',
+    name: 'aether_http_request_size_bytes',
     help: 'Size of HTTP requests in bytes',
     labelNames: ['method', 'route'],
     buckets: [100, 1000, 10000, 100000, 1000000],
@@ -57,7 +57,7 @@ export const setupMetrics = () => {
   });
 
   httpResponseSize = new client.Histogram({
-    name: 'ecommerce_http_response_size_bytes',
+    name: 'aether_http_response_size_bytes',
     help: 'Size of HTTP responses in bytes',
     labelNames: ['method', 'route'],
     buckets: [100, 1000, 10000, 100000, 1000000],
@@ -65,14 +65,14 @@ export const setupMetrics = () => {
   });
 
   activeConnections = new client.Gauge({
-    name: 'ecommerce_active_connections',
+    name: 'aether_active_connections',
     help: 'Number of active connections',
     registers: [register],
   });
 
   // Database Metrics
   databaseQueryDuration = new client.Histogram({
-    name: 'ecommerce_database_query_duration_seconds',
+    name: 'aether_database_query_duration_seconds',
     help: 'Duration of database queries in seconds',
     labelNames: ['operation', 'collection'],
     buckets: [0.001, 0.01, 0.1, 0.5, 1, 2, 5],
@@ -81,7 +81,7 @@ export const setupMetrics = () => {
 
   // Redis Metrics
   redisOperationDuration = new client.Histogram({
-    name: 'ecommerce_redis_operation_duration_seconds',
+    name: 'aether_redis_operation_duration_seconds',
     help: 'Duration of Redis operations in seconds',
     labelNames: ['operation'],
     buckets: [0.001, 0.01, 0.1, 0.5, 1],
@@ -90,13 +90,13 @@ export const setupMetrics = () => {
 
   cacheMetrics = {
     hits: new client.Counter({
-      name: 'ecommerce_cache_hits_total',
+      name: 'aether_cache_hits_total',
       help: 'Total number of cache hits',
       labelNames: ['cache_type'],
       registers: [register],
     }),
     misses: new client.Counter({
-      name: 'ecommerce_cache_misses_total',
+      name: 'aether_cache_misses_total',
       help: 'Total number of cache misses',
       labelNames: ['cache_type'],
       registers: [register],
@@ -106,25 +106,25 @@ export const setupMetrics = () => {
   // Business Metrics
   orderMetrics = {
     created: new client.Counter({
-      name: 'ecommerce_orders_created_total',
+      name: 'aether_orders_created_total',
       help: 'Total number of orders created',
       labelNames: ['merchant_id'],
       registers: [register],
     }),
     completed: new client.Counter({
-      name: 'ecommerce_orders_completed_total',
+      name: 'aether_orders_completed_total',
       help: 'Total number of orders completed',
       labelNames: ['merchant_id'],
       registers: [register],
     }),
     cancelled: new client.Counter({
-      name: 'ecommerce_orders_cancelled_total',
+      name: 'aether_orders_cancelled_total',
       help: 'Total number of orders cancelled',
       labelNames: ['merchant_id'],
       registers: [register],
     }),
     value: new client.Histogram({
-      name: 'ecommerce_order_value_rwf',
+      name: 'aether_order_value_rwf',
       help: 'Order value in RWF',
       labelNames: ['merchant_id'],
       buckets: [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000],
@@ -134,13 +134,13 @@ export const setupMetrics = () => {
 
   paymentMetrics = {
     attempts: new client.Counter({
-      name: 'ecommerce_payment_attempts_total',
+      name: 'aether_payment_attempts_total',
       help: 'Total number of payment attempts',
       labelNames: ['provider', 'status'],
       registers: [register],
     }),
     duration: new client.Histogram({
-      name: 'ecommerce_payment_duration_seconds',
+      name: 'aether_payment_duration_seconds',
       help: 'Payment processing duration in seconds',
       labelNames: ['provider'],
       buckets: [0.5, 1, 2, 5, 10, 30, 60],
@@ -150,13 +150,13 @@ export const setupMetrics = () => {
 
   inventoryMetrics = {
     reservations: new client.Counter({
-      name: 'ecommerce_inventory_reservations_total',
+      name: 'aether_inventory_reservations_total',
       help: 'Total number of inventory reservations',
       labelNames: ['status'], // success, failed
       registers: [register],
     }),
     stock: new client.Gauge({
-      name: 'ecommerce_inventory_stock_level',
+      name: 'aether_inventory_stock_level',
       help: 'Current stock level for products',
       labelNames: ['sku', 'merchant_id'],
       registers: [register],
@@ -172,12 +172,9 @@ export const metricsMiddleware = (req, res, next) => {
   if (!config.features.enableMetrics) {
     return next();
   }
-
-  const start = Date.now();
-  
+  const start = Date.now();  
   // Track active connections
-  activeConnections.inc();
-  
+  activeConnections.inc();  
   // Track request size
   if (req.get('content-length')) {
     const requestSize = parseInt(req.get('content-length'), 10);
@@ -186,7 +183,6 @@ export const metricsMiddleware = (req, res, next) => {
       requestSize
     );
   }
-
   res.on('finish', () => {
     const duration = (Date.now() - start) / 1000;
     const route = req.route?.path || req.path;
@@ -195,11 +191,9 @@ export const metricsMiddleware = (req, res, next) => {
       route,
       status_code: res.statusCode,
     };
-
     // Record metrics
     httpRequestDuration.observe(labels, duration);
-    httpRequestTotal.inc(labels);
-    
+    httpRequestTotal.inc(labels);    
     // Track response size
     if (res.get('content-length')) {
       const responseSize = parseInt(res.get('content-length'), 10);
@@ -208,11 +202,9 @@ export const metricsMiddleware = (req, res, next) => {
         responseSize
       );
     }
-
     // Decrease active connections
     activeConnections.dec();
   });
-
   next();
 };
 
@@ -221,7 +213,6 @@ export const recordOrderMetric = (event, merchantId, value = null) => {
   if (!config.features.enableMetrics || !orderMetrics[event]) {
     return;
   }
-
   if (event === 'value' && value !== null) {
     orderMetrics.value.observe({ merchant_id: merchantId }, value);
   } else {
@@ -233,7 +224,6 @@ export const recordPaymentMetric = (event, provider, status = null, duration = n
   if (!config.features.enableMetrics) {
     return;
   }
-
   if (event === 'attempts') {
     paymentMetrics.attempts.inc({ provider, status });
   } else if (event === 'duration' && duration !== null) {
@@ -245,7 +235,6 @@ export const recordInventoryMetric = (event, data) => {
   if (!config.features.enableMetrics) {
     return;
   }
-
   if (event === 'reservation') {
     inventoryMetrics.reservations.inc({ status: data.status });
   } else if (event === 'stock') {
@@ -260,7 +249,6 @@ export const recordCacheMetric = (event, cacheType) => {
   if (!config.features.enableMetrics) {
     return;
   }
-
   if (cacheMetrics[event]) {
     cacheMetrics[event].inc({ cache_type: cacheType });
   }
@@ -270,7 +258,6 @@ export const recordDatabaseMetric = (operation, collection, duration) => {
   if (!config.features.enableMetrics) {
     return;
   }
-
   databaseQueryDuration.observe({ operation, collection }, duration / 1000);
 };
 
@@ -278,7 +265,6 @@ export const recordRedisMetric = (operation, duration) => {
   if (!config.features.enableMetrics) {
     return;
   }
-
   redisOperationDuration.observe({ operation }, duration / 1000);
 };
 

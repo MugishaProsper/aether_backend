@@ -10,13 +10,11 @@ export const setupLogging = () => {
   if (logger) {
     return logger;
   }
-
   const logFormat = combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     errors({ stack: true }),
     json()
   );
-
   const consoleFormat = combine(
     colorize(),
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -28,7 +26,6 @@ export const setupLogging = () => {
       return msg;
     })
   );
-
   const transports = [
     // Console transport
     new winston.transports.Console({
@@ -37,7 +34,6 @@ export const setupLogging = () => {
       handleExceptions: true,
       handleRejections: true,
     }),
-
     // File transport for errors
     new winston.transports.File({
       filename: './logs/error.log',
@@ -46,7 +42,6 @@ export const setupLogging = () => {
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),
-
     // File transport for all logs
     new winston.transports.File({
       filename: './logs/combined.log',
@@ -55,7 +50,6 @@ export const setupLogging = () => {
       maxFiles: 10,
     }),
   ];
-
   // Add MongoDB transport in production
   if (config.env === 'production' && config.mongodb.uri) {
     transports.push(
@@ -72,23 +66,19 @@ export const setupLogging = () => {
       })
     );
   }
-
   logger = winston.createLogger({
     level: config.monitoring.logLevel,
     format: logFormat,
     transports,
     exitOnError: false,
   });
-
   // Handle uncaught exceptions and rejections
   logger.exceptions.handle(
     new winston.transports.File({ filename: './logs/exceptions.log' })
   );
-
   logger.rejections.handle(
     new winston.transports.File({ filename: './logs/rejections.log' })
   );
-
   return logger;
 };
 
@@ -99,8 +89,7 @@ export const generateRequestId = () => {
 
 // Structured logging helpers
 export const logRequest = (req, res, responseTime) => {
-  const logger = setupLogging();
-  
+  const logger = setupLogging();  
   logger.info('HTTP Request', {
     method: req.method,
     url: req.originalUrl,
@@ -114,8 +103,7 @@ export const logRequest = (req, res, responseTime) => {
 };
 
 export const logError = (error, req = null, context = {}) => {
-  const logger = setupLogging();
-  
+  const logger = setupLogging();  
   logger.error('Application Error', {
     error: error.message,
     stack: error.stack,
@@ -128,8 +116,7 @@ export const logError = (error, req = null, context = {}) => {
 };
 
 export const logSecurity = (event, req, details = {}) => {
-  const logger = setupLogging();
-  
+  const logger = setupLogging();  
   logger.warn('Security Event', {
     event,
     ip: req.ip,
@@ -144,7 +131,6 @@ export const logSecurity = (event, req, details = {}) => {
 
 export const logBusinessEvent = (event, data = {}) => {
   const logger = setupLogging();
-  
   logger.info('Business Event', {
     event,
     timestamp: new Date().toISOString(),

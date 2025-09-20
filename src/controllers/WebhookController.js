@@ -10,7 +10,7 @@ const stripe = config.stripe.secretKey
 class WebhookController {
   static async stripe(req, res) {
     if (!stripe || !config.stripe.webhookSecret) {
-      return res.status(503).json({ error: 'Webhook service not configured' });
+      return res.status(503).json({ error: 'Stripe webhook service not configured' });
     }
 
     const sig = req.headers['stripe-signature'];
