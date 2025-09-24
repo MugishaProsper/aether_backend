@@ -83,6 +83,7 @@ const userSchema = new mongoose.Schema({
   },
   lastLoginAt: Date,
   lastLoginIP: String,
+  lastLoginAgent : String
 }, {
   timestamps: true,
 });

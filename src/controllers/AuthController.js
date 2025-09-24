@@ -68,7 +68,8 @@ class AuthController {
 
     return successResponse(res, {
       user: user.toJSON(),
-      accessToken,
+      accessToken : accessToken,
+      refreshToken : refreshToken,
     }, 'Registration successful', 201);
   }
 
@@ -106,6 +107,7 @@ class AuthController {
     // Update last login
     user.lastLoginAt = new Date();
     user.lastLoginIP = clientIP;
+    user.lastLoginAgent = userAgent
     await user.save();
 
     // Generate tokens
@@ -125,7 +127,8 @@ class AuthController {
 
     return successResponse(res, {
       user: user.toJSON(),
-      accessToken,
+      accessToken : accessToken,
+      refreshToken : refreshToken,
     }, 'Login successful');
   }
 
