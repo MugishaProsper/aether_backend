@@ -164,6 +164,11 @@ export const processEmailJob = async (job) => {
 
 // Email utility functions for easy use
 export const EmailService = {
+  async sendVerificationEmail(email, fullname, verification_url){
+    const { JobScheduler } = await import('../index.js');
+    return JobScheduler.addEmailJob('verification', { email, fullname, verification_url });
+  },
+  
   async sendWelcomeEmail(email, name) {
     const { JobScheduler } = await import('../index.js');
     return JobScheduler.addEmailJob('welcome', { email, name });

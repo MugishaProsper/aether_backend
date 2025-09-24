@@ -5,18 +5,18 @@ import { config } from '../config/index.js';
 import { redis } from '../config/redis.js';
 import CacheService from '../services/CacheService.js';
 import { EmailService } from '../workers/processors/email.js';
-import { 
-  AuthenticationError, 
-  ValidationError, 
+import {
+  AuthenticationError,
+  ValidationError,
   NotFoundError,
-  successResponse 
+  successResponse
 } from '../middleware/error.js';
 import { logSecurity, setupLogging } from '../config/logging.js';
 
 const logger = setupLogging();
 
 class AuthController {
-  async register(req, res) {
+  register = async (req, res) => {
     const { email, password, fullname, phone, role } = req.body;
 
     // Check if user already exists
@@ -29,7 +29,10 @@ class AuthController {
     const user = new User({
       email,
       passwordHash: password, // Will be hashed by pre-save hook
-      profile: { fullname, phone },
+      profile: {
+        name: fullname,
+        phone: phone
+      },
       role: role || 'BUYER',
       verification: {
         email: {
@@ -49,8 +52,8 @@ class AuthController {
 
     // Send verification email
     await EmailService.sendVerificationEmail(
-      email, 
-      fullname, 
+      email,
+      fullname,
       `${process.env.FRONTEND_URL}/verify-email?token=${user.verification.email.token}`
     );
 
@@ -60,20 +63,20 @@ class AuthController {
     // Set refresh token cookie
     this.setRefreshTokenCookie(res, refreshToken);
 
-    logger.info('User registered successfully', { 
-      userId: user._id, 
-      email, 
-      role: user.role 
+    logger.info('User registered successfully', {
+      userId: user._id,
+      email,
+      role: user.role
     });
 
     return successResponse(res, {
       user: user.toJSON(),
-      accessToken : accessToken,
-      refreshToken : refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     }, 'Registration successful', 201);
   }
 
-  async login(req, res) {
+  login = async (req, res) => {
     const { email, password, rememberMe } = req.body;
     const clientIP = req.ip;
     const userAgent = req.get('User-Agent');
@@ -111,7 +114,8 @@ class AuthController {
     await user.save();
 
     // Generate tokens
-    const { accessToken, refreshToken } = await this.generateTokens(user, rememberMe);
+    const { accessToken, refreshToken } = await this.generateTokens(user, req, rememberMe);
+    console.log(accessToken, refreshToken)
 
     // Set refresh token cookie
     this.setRefreshTokenCookie(res, refreshToken, rememberMe);
@@ -119,20 +123,20 @@ class AuthController {
     // Cache user data
     await CacheService.setUser(user._id.toString(), user.toJSON());
 
-    logger.info('User logged in successfully', { 
-      userId: user._id, 
+    logger.info('User logged in successfully', {
+      userId: user._id,
       email,
-      ip: clientIP 
+      ip: clientIP
     });
 
     return successResponse(res, {
       user: user.toJSON(),
-      accessToken : accessToken,
-      refreshToken : refreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     }, 'Login successful');
   }
 
-  async logout(req, res) {
+  logout = async (req, res) => {
     const { user, tokenPayload } = req;
     const refreshToken = req.cookies.refreshToken;
 
@@ -165,7 +169,7 @@ class AuthController {
     return successResponse(res, null, 'Logout successful');
   }
 
-  async logoutAll(req, res) {
+  logoutAll = async (req, res) => {
     const { user } = req;
 
     // Remove all refresh tokens for user
@@ -187,7 +191,7 @@ class AuthController {
     return successResponse(res, null, 'Logged out from all devices');
   }
 
-  async refreshToken(req, res) {
+  refreshToken = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
       throw new AuthenticationError('Refresh token not provided');
@@ -220,7 +224,7 @@ class AuthController {
     }, 'Token refreshed successfully');
   }
 
-  async forgotPassword(req, res) {
+  forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     const user = await User.findByEmail(email);
@@ -245,7 +249,7 @@ class AuthController {
     return successResponse(res, null, 'If the email exists, a reset link has been sent');
   }
 
-  async resetPassword(req, res) {
+  resetPassword = async (req, res) => {
     const { token, password } = req.body;
 
     const user = await User.findOne({
@@ -261,10 +265,10 @@ class AuthController {
     user.passwordHash = password; // Will be hashed by pre-save hook
     user.security.passwordResetToken = undefined;
     user.security.passwordResetExpires = undefined;
-    
+
     // Reset login attempts
     await user.resetLoginAttempts();
-    
+
     await user.save();
 
     // Logout from all devices
@@ -276,7 +280,7 @@ class AuthController {
     return successResponse(res, null, 'Password reset successful');
   }
 
-  async verifyEmail(req, res) {
+  verifyEmail = async (req, res) => {
     const { token } = req.body;
 
     const user = await User.findOne({
@@ -298,7 +302,7 @@ class AuthController {
     return successResponse(res, null, 'Email verified successfully');
   }
 
-  async resendVerification(req, res) {
+  resendVerification = async (req, res) => {
     const { user } = req;
 
     if (user.verification.email.verified) {
@@ -320,12 +324,12 @@ class AuthController {
     return successResponse(res, null, 'Verification email sent');
   }
 
-  async getProfile(req, res) {
+  getProfile = async (req, res) => {
     const { user } = req;
     return successResponse(res, user.toJSON(), 'Profile retrieved successfully');
   }
 
-  async updateProfile(req, res) {
+  updateProfile = async (req, res) => {
     const { user } = req;
     const updates = req.body;
 
@@ -350,7 +354,7 @@ class AuthController {
     return successResponse(res, updatedUser.toJSON(), 'Profile updated successfully');
   }
 
-  async changePassword(req, res) {
+  changePassword = async (req, res) => {
     const { user } = req;
     const { currentPassword, newPassword } = req.body;
 
@@ -373,13 +377,13 @@ class AuthController {
     return successResponse(res, null, 'Password changed successfully');
   }
 
-  async getSessions(req, res) {
+  getSessions = async (req, res) => {
     const { user } = req;
-    
+
     // Get all active refresh tokens
     const pattern = `refresh:*:${user._id}`;
     const keys = await redis.getClient().keys(pattern);
-    
+
     const sessions = [];
     for (const key of keys) {
       const sessionData = await redis.getJson(key);
@@ -398,14 +402,14 @@ class AuthController {
     return successResponse(res, sessions, 'Sessions retrieved successfully');
   }
 
-  async revokeSession(req, res) {
+  revokeSession = async (req, res) => {
     const { user } = req;
     const { sessionId } = req.params;
 
     // Find and remove the specific session
     const pattern = `refresh:*:${user._id}`;
     const keys = await redis.getClient().keys(pattern);
-    
+
     for (const key of keys) {
       const sessionData = await redis.getJson(key);
       if (sessionData && sessionData.sessionId === sessionId) {
@@ -419,7 +423,7 @@ class AuthController {
   }
 
   // Helper methods
-  async generateTokens(user, rememberMe = false) {
+  async generateTokens(user, req, rememberMe = false) {
     const sessionId = uuidv4();
     const jti = uuidv4(); // JWT ID for token revocation
 
@@ -436,10 +440,10 @@ class AuthController {
     const accessToken = jwt.sign(
       accessPayload,
       config.jwt.accessTokenSecret,
-      { 
+      {
         expiresIn: config.jwt.accessTokenExpiry,
-        issuer: 'ecommerce-backend',
-        audience: 'ecommerce-frontend',
+        issuer: 'aether-backend',
+        audience: 'aether-frontend',
       }
     );
 
@@ -470,7 +474,7 @@ class AuthController {
 
   setRefreshTokenCookie(res, refreshToken, rememberMe = false) {
     const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
-    
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: config.env === 'production',

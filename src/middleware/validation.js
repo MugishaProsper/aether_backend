@@ -43,13 +43,7 @@ const baseSchemas = {
   // Password validation
   password: Joi.string()
     .min(8)
-    .max(128)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .messages({
-      'string.min': 'Password must be at least 8 characters long',
-      'string.max': 'Password must not exceed 128 characters',
-      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-    }),
+    .max(128),
 
   // Phone number validation (Rwanda format)
   phone: Joi.string()
@@ -84,9 +78,9 @@ export const schemas = {
     register: Joi.object({
       email: baseSchemas.email.required(),
       password: baseSchemas.password.required(),
-      name: Joi.string().min(2).max(100).trim().required(),
+      fullname: Joi.string().min(2).max(100).trim().required(),
       phone: baseSchemas.phone,
-      role: Joi.string().valid('buyer', 'seller').default('buyer'),
+      role: Joi.string().valid('BUYER', 'SELLER').default('BUYER'),
     }),
 
     login: Joi.object({
@@ -171,7 +165,7 @@ export const schemas = {
         isActive: Joi.boolean().default(true),
       })),
       specifications: Joi.object().pattern(Joi.string(), Joi.string()),
-      status: Joi.string().valid('draft', 'active', 'inactive', 'archived'),
+      status: Joi.string().valid('DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'),
       featured: Joi.boolean(),
     }),
 
@@ -235,21 +229,21 @@ export const schemas = {
         zipCode: Joi.string().max(20),
         country: Joi.string().max(100).default('Rwanda'),
       }),
-      paymentMethod: Joi.string().valid('stripe', 'paypal', 'bank_transfer', 'cash_on_delivery').required(),
+      paymentMethod: Joi.string().valid('STRIPE', 'PAYPAL', 'BANK_TRANSFER', 'CASH_ON_DELIVERY').required(),
       notes: Joi.string().max(500),
     }),
 
     updateStatus: Joi.object({
       status: Joi.string().valid(
-        'created',
-        'payment_pending',
-        'payment_failed',
-        'paid',
-        'processing',
-        'shipped',
-        'delivered',
-        'cancelled',
-        'refunded'
+        'CREATED',
+        'PAYMENT_PENDING',
+        'PAYMENT_FAILED',
+        'PAID',
+        'PROCESSING',
+        'SHIPPED',
+        'DELIVERED',
+        'CANCELLED',
+        'REFUNDED'
       ).required(),
       notes: Joi.string().max(500),
     }),
@@ -278,8 +272,8 @@ export const schemas = {
   // Admin schemas
   admin: {
     userUpdate: Joi.object({
-      role: Joi.string().valid('buyer', 'seller', 'admin', 'superadmin'),
-      status: Joi.string().valid('active', 'suspended', 'deleted'),
+      role: Joi.string().valid('BUYER', 'SELLER', 'ADMIN', 'SUPERADMIN'),
+      status: Joi.string().valid('ACTIVE', 'SUSPENDED', 'DELETED'),
       merchantId: Joi.string(),
     }),
 
@@ -287,7 +281,7 @@ export const schemas = {
       merchantId: Joi.string(),
       startDate: Joi.date().iso(),
       endDate: Joi.date().iso().min(Joi.ref('startDate')),
-      groupBy: Joi.string().valid('day', 'week', 'month').default('day'),
+      groupBy: Joi.string().valid('DAY', 'WEEK', 'MONTH').default('DAY'),
     }),
   },
 };

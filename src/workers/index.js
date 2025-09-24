@@ -22,7 +22,7 @@ export const QUEUES = {
   ANALYTICS: 'analytics',
   PAYMENT: 'payment',
   INVENTORY: 'inventory',
-  NOTIFICATION: 'notification',
+  NOTIFICATION: 'notification'
 };
 
 // Job priorities
